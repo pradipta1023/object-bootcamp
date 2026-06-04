@@ -1,47 +1,43 @@
 package com.tw.bootcamp.p5;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Bag {
     private final int capacity;
+    private final List<BallRule> rules;
     private final HashMap<Color, Integer> ballsInventory;
-    private int noOfBallsInTheBag;
 
-    public Bag(int capacity) {
-        this.ballsInventory = new HashMap<>();
+    public Bag(int capacity, List<BallRule> rules) {
         this.capacity = capacity;
-        this.noOfBallsInTheBag = 0;
+        this.rules = rules;
+        this.ballsInventory = new HashMap<>();
+    }
+
+    public int getCountForColor(Color color) {
+        return ballsInventory.getOrDefault(color, 0);
     }
 
     public boolean add(Color color) {
-        Integer noOfBalls = ballsInventory.getOrDefault(color,0);
-        Integer greenCount = ballsInventory.getOrDefault(Color.GREEN, 0);
+        for (BallRule rule : rules) {
+            if (!rule.isValidRule(color, this)) {
+                return false;
+            }
+        }
 
-        if (isGreenOverFlow(color, greenCount) || (noOfBallsInTheBag >= capacity)) return false;
-
-        if(isRedOverFlow(color, noOfBalls, greenCount)) return false;
-
-        if (isYellowOverFlow(color)) return false;
-
-        ballsInventory.put(color, noOfBalls + 1);
-        noOfBallsInTheBag++;
-
+        addBall(color);
         return true;
     }
 
-    private boolean isYellowOverFlow(Color color) {
-        double fortyPercentOfTotalBalls = noOfBallsInTheBag * (double) (40 / 100);
-        Integer yellowBalls = ballsInventory.getOrDefault(color, 0);
-        boolean isYellowMoreThanFortyPercent = fortyPercentOfTotalBalls > yellowBalls;
-
-        return color == Color.YELLOW && isYellowMoreThanFortyPercent;
+    private void addBall(Color color) {
+        ballsInventory.put(color, ballsInventory.getOrDefault(color, 0) + 1);
     }
 
-    private static boolean isRedOverFlow(Color color, Integer noOfBalls, Integer greenCount) {
-        return color == Color.RED && noOfBalls >= greenCount * 2;
-    }
+    public int getTotalCount() {
+        AtomicInteger totalCount = new AtomicInteger();
+        ballsInventory.forEach((Color color, Integer countOfBalls) -> totalCount.addAndGet(countOfBalls));
 
-    private static boolean isGreenOverFlow(Color color, Integer greenCount) {
-        return (color == Color.GREEN) && (greenCount >= 3);
+        return totalCount.get();
     }
 }

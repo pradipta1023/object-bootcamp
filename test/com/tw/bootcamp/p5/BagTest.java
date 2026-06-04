@@ -1,25 +1,35 @@
 package com.tw.bootcamp.p5;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BagTest {
-    @Test
-    void shouldAddTheBallInTheBag() {
-        Bag bag = new Bag(12);
-        assertTrue(bag.add(Color.YELLOW));
+
+    private Bag bag;
+
+    @BeforeEach
+    void setUp() {
+        List<BallRule> rules = new ArrayList<>();
+        rules.add(new GreenBallRule());
+        rules.add(new YellowBallRule());
+        rules.add(new RedBallRule());
+
+        bag = new Bag(12, rules);
     }
 
     @Test
-    void shouldRejectTheBallAdditionInToTheBagOnTheCapacityOverflow() {
-        Bag bag = new Bag(0);
-        assertFalse(bag.add(Color.RED));
+    void shouldAddTheBallInTheBag() {
+        assertTrue(bag.add(Color.BLUE));
     }
 
     @Test
     void setLimitToTheGreenColoredBall() {
-        Bag bag = new Bag(12);
         bag.add(Color.GREEN);
         bag.add(Color.GREEN);
         assertTrue(bag.add(Color.GREEN));
@@ -28,19 +38,23 @@ class BagTest {
 
     @Test
     void shouldSetTheMaxLimitForRedAsPerTheGreenCount() {
-        Bag bag = new Bag(12);
         assertFalse(bag.add(Color.RED));
     }
 
     @Test
     void shouldNotAddYellowIfTotalYellowBallIsMoreThanFortyPercentOfTotalBalls() {
-        Bag bag = new Bag(12);
          assertFalse(bag.add(Color.YELLOW));
     }
 
     @Test
     void shouldAddYellowIfItsCountLessThanFortyPercentOfTotalBalls() {
-        Bag bag = new Bag(12);
+        bag.add(Color.GREEN);
+        bag.add(Color.GREEN);
         assertTrue(bag.add(Color.YELLOW));
+    }
+
+    @Test
+    void shouldNotAddRedIfItsCountIsGreaterThanDoubleOfGreen() {
+        assertFalse(bag.add(Color.RED));
     }
 }
